@@ -12,18 +12,17 @@ const roomsData = [];
 
 let port = process.env.PORT || 8080;
 
-const custBookings = []
-let rooms = [];
+const custBookings = [];
 
 app
     .use(bodyParser.json())
 
     .post('/api/createRoom', (request, response) => {
 
-        let rooms = JSON.parse(JSON.stringify(request.body));
-        const isRoomValid = myValidator.validate(rooms, roomSchema, { required: true }).valid;
+        let room = JSON.parse(JSON.stringify(request.body));
+        const isRoomValid = myValidator.validate(room, roomSchema, { required: true }).valid;
         
-        if (rooms !== undefined && isRoomValid) {
+        if (room !== undefined && isRoomValid) {
 
             const newRoom = {
                 roomId: roomsData.length + 1,
@@ -56,10 +55,10 @@ app
             const newBookRoom = {
                 customerId: `${request.body.customerName + '-' + (custBookings.length + 1)}`,
                 customerName: request.body.customerName,
-                roomId: request.body.roomId,
+                Date: new Date().toString(),
                 startDate: request.body.startDate,
                 endDate: request.body.endDate,
-                currentDate: new Date().toString(),
+                roomId: request.body.roomId,
             };
             custBookings.push(newBookRoom);
             
@@ -74,13 +73,34 @@ app
         }
 
     })
-    .get('/listAllRooms', (request, response) => {
-        response.status(200).json({
-            data: roomsData,
-        })
+    .get('/api/listAllRooms', (request, response) => {
+        const allRoomsData = [];
+        custBookings.forEach((booking) => {
+            let listARoom = {
+                roomName : roomsData.find(room => room.roomId === booking.roomId).roomName,
+                bookingStatus : "Successful",
+                customerName : booking.customerName,
+                Date : booking.Date,
+                startDate : booking.startDate,
+                endDate : booking.endDate,
+            }
+            allRoomsData.push(listARoom);
+        });
+        response.status(200).send(allRoomsData);
     })
-    .get('/allCustomers', (request, response) => {
-
+    .get('/api/listAllCustomers', (request, response) => {
+        const allCustomers = [];
+        custBookings.forEach((booking) => {
+            let listaCustomer = {
+                customerName : booking.customerName,
+                roomName : roomsData.find(room => room.roomId === booking.roomId).roomName,
+                Date : booking.Date,
+                startDate : booking.startDate,
+                endDate : booking.endDate,
+            }
+            allCustomers.push(listaCustomer);
+        });
+        response.status(200).send(allCustomers);
     })
     .get('/*', (request, response) => {
         response.status(404).send('<h1>Page Not Found ! </h1>');
