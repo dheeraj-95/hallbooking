@@ -7,6 +7,7 @@ var myValidator = new Validator();
 
 const { roomSchema, bookRoomSchema } = require('./Schema/schemas');
 const isIsoDate = require('./Helpers/helper');
+const { request, response } = require('express');
 
 const roomsData = [];
 
@@ -16,7 +17,12 @@ const custBookings = [];
 
 app
     .use(bodyParser.json())
-
+    .get('/', (request, response) => {
+        response.redirect('/api')
+    })
+    .get('/api',(request, response) => {
+        response.status(200).send('<h1>Welcome to Hall Booking API</h1>');
+    })
     .post('/api/createRoom', (request, response) => {
 
         let room = JSON.parse(JSON.stringify(request.body));
@@ -102,7 +108,7 @@ app
         });
         response.status(200).send(allCustomers);
     })
-    .get('/*', (request, response) => {
+    .get('/api/*', (request, response) => {
         response.status(404).send('<h1>Page Not Found ! </h1>');
     })
     .listen(port, console.log(`Booking App listening at port ${port}`));
